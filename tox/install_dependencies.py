@@ -60,7 +60,7 @@ def install_travis():
 
     return pip_install(
         # Package requirements
-        'git+ssh://github.com/fuzeman/byte.git@%s' % (branch,),
+        'git+https://github.com/fuzeman/byte.git@%s' % (branch,),
 
         # Test requirements
         '-rtests/requirements.txt'
