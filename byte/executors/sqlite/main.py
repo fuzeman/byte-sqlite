@@ -1,8 +1,8 @@
 """byte-sqlite - executor module."""
 from __future__ import absolute_import, division, print_function
 
-from byte.executors.sqlite.tasks import SqliteSelectTask
 from byte.executors.core.base import ExecutorPlugin
+from byte.executors.sqlite.tasks import SqliteSelectTask
 from byte.statements import SelectStatement
 
 import os
