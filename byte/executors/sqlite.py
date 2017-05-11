@@ -15,3 +15,7 @@ class SqliteExecutor(ExecutorPlugin):
             'db',
             'sqlite'
         ]
+
+    def construct_compiler(self):
+        """Construct compiler."""
+        return self.plugins.get_compiler('sqlite')(self)

@@ -3,7 +3,7 @@ from byte.compilers.sqlite.base import BaseSqliteCompiler, Clause
 from byte.statements import InsertStatement
 
 
-class SqliteInsertCompiler(Compiler, BaseSqliteCompiler):
+class SqliteInsertCompiler(BaseSqliteCompiler):
     def compile(self, statement):
         if not isinstance(statement, InsertStatement):
             raise ValueError('Invalid value provided for "query" (expected InsertQuery instance)')

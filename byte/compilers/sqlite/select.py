@@ -3,7 +3,7 @@ from byte.compilers.sqlite.base import BaseSqliteCompiler
 from byte.statements import SelectStatement
 
 
-class SqliteSelectCompiler(Compiler, BaseSqliteCompiler):
+class SqliteSelectCompiler(BaseSqliteCompiler):
     def compile(self, statement):
         if not isinstance(statement, SelectStatement):
             raise ValueError('Invalid value provided for "query" (expected SelectQuery instance)')

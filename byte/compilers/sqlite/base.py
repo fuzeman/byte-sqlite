@@ -1,3 +1,4 @@
+from byte.compilers.core.base import Compiler
 from byte.expressions import (
     And, CompoundExpression, MultiExpression, Equal, GreaterThan, GreaterThanOrEqual,
     LessThan, LessThanOrEqual, NotEqual, Or
@@ -7,7 +8,7 @@ from byte.property import Property, PropertyExpression
 from six import string_types
 
 
-class BaseSqliteCompiler(object):
+class BaseSqliteCompiler(Compiler):
     def __init__(self, executor):
         super(BaseSqliteCompiler, self).__init__(executor)
 
