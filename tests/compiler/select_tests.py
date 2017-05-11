@@ -1,3 +1,5 @@
+from __future__ import absolute_import, division, print_function
+
 from byte.collection import Collection
 from byte.model import Model
 from byte.property import Property
@@ -16,6 +18,7 @@ class User(Model):
 
 
 def test_all():
+    """Test select statement can be compiled to return all items."""
     users = Collection(User, 'sqlite://:memory:?table=users')
 
     sql, parameters = users.executor.compiler.compile(users.all())

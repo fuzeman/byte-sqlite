@@ -1,10 +1,23 @@
-from byte.compilers.core.base import Compiler
+"""byte-sqlite - insert compiler module."""
+from __future__ import absolute_import, division, print_function
+
 from byte.compilers.sqlite.base import BaseSqliteCompiler, Clause
 from byte.statements import InsertStatement
 
 
+# TODO Update SQLite insert compiler
 class SqliteInsertCompiler(BaseSqliteCompiler):
+    """SQLite insert statement compiler class."""
+
     def compile(self, statement):
+        """Compile :code:`statement` into SQLite statement.
+
+        :param statement: Insert Statement
+        :type statement: byte.statements.InsertStatement
+
+        :return: SQLite statement
+        :rtype: tuple
+        """
         if not isinstance(statement, InsertStatement):
             raise ValueError('Invalid value provided for "query" (expected InsertQuery instance)')
 
