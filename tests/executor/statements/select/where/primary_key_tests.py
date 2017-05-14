@@ -41,7 +41,7 @@ def test_simple():
     """)
 
     # Validate items
-    user = users.select().where(2).first()
+    user = users.select().where(User['id'] == 2).first()
 
     assert user is not None
     assert user.username == 'two'

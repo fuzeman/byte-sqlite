@@ -41,7 +41,7 @@ def test_simple():
     """)
 
     # Validate items
-    user = users.get(2)
+    user = users.get(User['id'] == 2)
 
     assert user is not None
     assert user.username == 'two'
