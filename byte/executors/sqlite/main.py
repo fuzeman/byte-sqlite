@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function
 
 from byte.executors.core.base import ExecutorPlugin
 from byte.executors.sqlite.tasks import SqliteSelectTask
-from byte.statements import SelectStatement
+from byte.queries import SelectQuery
 
 import os
 import sqlite3
@@ -87,19 +87,19 @@ class SqliteExecutor(ExecutorPlugin):
         """
         return self.connect().cursor()
 
-    def execute(self, statement):
-        """Execute statement.
+    def execute(self, query):
+        """Execute query.
 
-        :param statement: Statement
-        :type statement: byte.statements.core.base.Statement
+        :param query: Query
+        :type query: byte.queries.Query
         """
-        sql, parameters = self.compiler.compile(statement)
+        statement, parameters = self.compiler.compile(query)
 
-        if not sql:
+        if not statement:
             raise ValueError('Empty statement')
 
         # Construct task
-        if isinstance(statement, SelectStatement):
-            return SqliteSelectTask(self, sql, parameters).execute()
+        if isinstance(query, SelectQuery):
+            return SqliteSelectTask(self, statement, parameters).execute()
 
-        raise NotImplementedError('Unsupported statement: %s' % (type(statement).__name__,))
+        raise NotImplementedError('Unsupported query: %s' % (type(statement).__name__,))
