@@ -1,59 +1,62 @@
 """byte-sqlite - insert compiler module."""
 from __future__ import absolute_import, division, print_function
 
-from byte.compilers.sqlite.base import BaseSqliteCompiler, Clause
-from byte.statements import InsertStatement
+from byte.compilers.sqlite.base import BaseSqliteCompiler
+from byte.compilers.sqlite.models import SqliteClause, SqliteCommaSet, SqliteEnclosedSet, SqliteEntity
+from byte.queries import InsertQuery
 
 
-# TODO Update SQLite insert compiler
 class SqliteInsertCompiler(BaseSqliteCompiler):
     """SQLite insert statement compiler class."""
 
-    def compile(self, statement):
-        """Compile :code:`statement` into SQLite statement.
+    def compile(self, query):
+        """Compile :code:`query` into SQLite statement.
 
-        :param statement: Insert Statement
-        :type statement: byte.statements.InsertStatement
+        :param query: Insert Query
+        :type query: byte.queries.InsertQuery
 
         :return: SQLite statement
         :rtype: tuple
         """
-        if not isinstance(statement, InsertStatement):
+        if not isinstance(query, InsertQuery):
             raise ValueError('Invalid value provided for "query" (expected InsertQuery instance)')
 
-        clauses = ['INSERT']
+        # INSERT
+        nodes = [SqliteClause('INSERT')]
 
-        clauses.append('INTO')
-        clauses.append('"%s"' % self.table)
+        # TODO INSERT OR
 
-        clauses.append('(%s)' % (
-            ', '.join([
-                '"%s"."%s"' % (
-                    self.table,
-                    key
-                )
-                for key, prop in self.model.Internal.properties_by_name.items()
-                if not prop.primary_key
-            ])
+        # INTO
+        nodes.extend((
+            SqliteClause('INTO'),
+            SqliteEntity(self.table)
         ))
 
-        clauses.append('VALUES')
+        # COLUMNS
+        columns = {}
 
-        for i, item in enumerate(statement.items):
-            parameters = []
+        for prop in query.state['properties']:
+            columns[prop.name] = SqliteEntity(self.table, prop.name)
 
-            for key, prop in self.model.Internal.properties_by_name.items():
-                if prop.primary_key:
-                    continue
+        # ROWS
+        rows = []
 
-                parameters.append(item.get(key))
+        for i, item in enumerate(query.state['items']):
+            row = []
 
-            clauses.append(Clause(
-                '(%s)%s' % (
-                    ', '.join(['?' for _ in parameters]),
-                    ',' if i < len(statement.items) - 1 else ''
-                ),
-                *parameters
-            ))
+            for name in columns:
+                row.append(SqliteClause('?', item.get(name)))
 
-        return self.join(clauses)
+            rows.append(SqliteEnclosedSet(*row))
+
+        # PROPERTIES, VALUES
+        nodes.extend([
+            SqliteEnclosedSet(*columns.values()),
+            SqliteClause('VALUES'),
+            SqliteCommaSet(*rows)
+        ])
+
+        # TODO RETURNING
+
+        # Compile nodes into SQLite Statement
+        return self.compile_nodes(nodes)

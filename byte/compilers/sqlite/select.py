@@ -2,33 +2,84 @@
 from __future__ import absolute_import, division, print_function
 
 from byte.compilers.sqlite.base import BaseSqliteCompiler
-from byte.statements import SelectStatement
+from byte.compilers.sqlite.models import SqliteClause, SqliteCommaSet, SqliteEntity
+from byte.queries import SelectQuery
 
 
 class SqliteSelectCompiler(BaseSqliteCompiler):
     """SQLite select statement compiler class."""
 
-    def compile(self, statement):
-        """Compile :code:`statement` into SQLite statement.
+    def compile(self, query):
+        """Compile :code:`query` into SQLite query.
 
-        :param statement: Select Statement
-        :type statement: byte.statements.SelectStatement
+        :param query: Select Query
+        :type query: byte.queries.SelectQuery
 
-        :return: SQLite statement
-        :rtype: tuple
+        :return: SQLite Statement
+        :rtype: (str, tuple)
         """
-        if not isinstance(statement, SelectStatement):
+        if not isinstance(query, SelectQuery):
             raise ValueError('Invalid value provided for "query" (expected SelectQuery instance)')
 
-        clauses = ['SELECT']
+        # SELECT / SELECT DISTINCT
+        if query.state['distinct']:
+            nodes = [SqliteClause('SELECT DISTINCT')]
+        else:
+            nodes = [SqliteClause('SELECT')]
 
-        self.add_properties(clauses, statement.properties)
+        # PROPERTIES
+        if query.state['select'] is not None:
+            nodes.append(SqliteCommaSet(*query.state['select']))
+        else:
+            nodes.append(SqliteClause('*'))
 
-        clauses.append('FROM')
-        clauses.append('"%s"' % self.table)
+        # FROM
+        nodes.append(SqliteClause('FROM'))
 
-        if statement.state.get('where'):
-            clauses.append('WHERE')
-            clauses.append(self.join('AND', self.encode_expressions(statement.state['where'])))
+        if query.state['from']:
+            nodes.append(SqliteCommaSet(*tuple([
+                SqliteEntity(value)
+                for value in query.state['from']
+            ])))
+        else:
+            nodes.append(SqliteEntity(self.table))
 
-        return self.merge(clauses)
+        # TODO JOIN
+
+        # WHERE
+        if query.state['where']:
+            nodes.extend((
+                SqliteClause('WHERE'),
+                self.parse_expressions(query.state['where'])
+            ))
+
+        # GROUP BY
+        if query.state['group_by'] is not None:
+            nodes.extend((
+                SqliteClause('GROUP BY'),
+                SqliteCommaSet(*query.state['group_by'])
+            ))
+
+        # TODO HAVING
+
+        # TODO WINDOW
+
+        # ORDER BY
+        if query.state['order_by'] is not None:
+            nodes.extend((
+                SqliteClause('ORDER BY'),
+                SqliteCommaSet(*query.state['order_by'])
+            ))
+
+        # LIMIT
+        if query.state['limit'] is not None:
+            nodes.append(SqliteClause('LIMIT ?', query.state['limit']))
+
+        # OFFSET
+        if query.state['offset'] is not None:
+            nodes.append(SqliteClause('OFFSET ?', query.state['offset']))
+
+        # TODO for_update
+
+        # Compile nodes into SQLite Statement
+        return self.compile_nodes(nodes)

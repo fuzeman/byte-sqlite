@@ -5,7 +5,7 @@ from byte.compilers.core.base import CompilerPlugin
 from byte.compilers.sqlite.base import BaseSqliteCompiler
 from byte.compilers.sqlite.insert import SqliteInsertCompiler
 from byte.compilers.sqlite.select import SqliteSelectCompiler
-from byte.statements import InsertStatement, SelectStatement
+from byte.queries import InsertQuery, SelectQuery
 
 
 class SqliteCompiler(CompilerPlugin, BaseSqliteCompiler):
@@ -43,10 +43,10 @@ class SqliteCompiler(CompilerPlugin, BaseSqliteCompiler):
         :return: SQLite statement
         :rtype: tuple
         """
-        if isinstance(statement, InsertStatement):
+        if isinstance(statement, InsertQuery):
             return self.insert.compile(statement)
 
-        if isinstance(statement, SelectStatement):
+        if isinstance(statement, SelectQuery):
             return self.select.compile(statement)
 
         raise NotImplementedError
