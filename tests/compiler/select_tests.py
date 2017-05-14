@@ -25,3 +25,13 @@ def test_all():
 
     assert_that(sql, equal_to('SELECT * FROM "users";'))
     assert_that(parameters, equal_to(tuple()))
+
+
+def test_where():
+    """Test select statement with where expressions can be compiled."""
+    users = Collection(User, 'sqlite://:memory:?table=users')
+
+    sql, parameters = users.executor.compiler.compile(users.select().where(User['id'] == 142))
+
+    assert_that(sql, equal_to('SELECT * FROM "users" WHERE "users"."id" == ?;'))
+    assert_that(parameters, equal_to((142,)))
