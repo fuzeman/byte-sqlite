@@ -21,10 +21,10 @@ class BaseSqliteCompiler(Compiler):
 
     def parse_expressions(self, expressions):
         """Parse proxy expressions into SQLite expressions.
-        
+
         :param expressions: Expressions
         :type expressions: byte.base.BaseExpression
-        
+
         :return: SQLite Nodes
         :rtype: byte.compilers.core.models.nodes.Node
         """
@@ -33,10 +33,10 @@ class BaseSqliteCompiler(Compiler):
     @staticmethod
     def compile_nodes(nodes):
         """Compile nodes into SQLite statement.
-        
+
         :param nodes: Nodes
         :type nodes: list of byte.compilers.core.models.nodes.Node
-        
+
         :return: SQLite Statement
         :rtype: (str, tuple)
         """

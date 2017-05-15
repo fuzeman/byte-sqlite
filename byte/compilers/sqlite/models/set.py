@@ -1,8 +1,11 @@
+"""byte-sqlite - compiler set model module."""
+from __future__ import absolute_import, division, print_function
+
 from byte.core.models import Set
 
 
 class SqliteSet(Set):
-    """SQlite node set class."""
+    """SQlite set class."""
 
     delimiter = ' '
 
@@ -34,6 +37,10 @@ class SqliteSet(Set):
             self.suffix = suffix
 
     def compile(self):
+        """Compile SQLite set.
+
+        :rtype: (str, tuple)
+        """
         # Compile children
         statement, parameters = self.compile_children()
 
@@ -41,6 +48,10 @@ class SqliteSet(Set):
         return self.prefix + statement + self.suffix, parameters
 
     def compile_children(self):
+        """Compile SQLite set children.
+
+        :rtype: (str, tuple)
+        """
         statements = []
         parameters = []
 
@@ -54,9 +65,13 @@ class SqliteSet(Set):
 
 
 class SqliteCommaSet(SqliteSet):
+    """SQLite comma set class."""
+
     delimiter = ', '
 
 
 class SqliteEnclosedSet(SqliteCommaSet):
+    """SQLite enclosed set class."""
+
     prefix = '('
     suffix = ')'

@@ -1,8 +1,15 @@
+"""byte-sqlite - compiler expression models module."""
+from __future__ import absolute_import, division, print_function
+
+from byte.compilers.sqlite.models.clause import SqliteClause
+from byte.compilers.sqlite.models.entity import SqliteEntity
+from byte.compilers.sqlite.models.set import SqliteSet
 from byte.core.models import BaseProperty, Expressions, Node
 from byte.core.models.expressions.base import (
     And,
     Between,
     Equal,
+    Expression,
     GreaterThan,
     GreaterThanOrEqual,
     In,
@@ -17,9 +24,6 @@ from byte.core.models.expressions.base import (
     RegularExpression
 )
 from byte.core.models.expressions.proxy import BaseProxyExpression
-from byte.compilers.sqlite.models.clause import SqliteClause
-from byte.compilers.sqlite.models.entity import SqliteEntity
-from byte.compilers.sqlite.models.set import SqliteSet
 
 import inspect
 
@@ -49,8 +53,25 @@ import inspect
 # bin_or = _e(OP.BIN_OR)
 # __invert__
 class SqliteExpressions(Expressions):
+    """SQLite expressions class."""
+
+    @property
+    def compiler(self):
+        """Retrieve current compiler.
+
+        :rtype: byte.compilers.core.base.Compiler
+        """
+        raise NotImplementedError
+
     @classmethod
     def match(cls, source):
+        """Find an expression matching the provided `source` expression.
+
+        :param source: Source Expression
+        :type source: byte.core.models.expressions.base.Expression
+
+        :return: SQLite Expression Class
+        """
         if hasattr(source, '__class__'):
             source = source.__class__
 
@@ -74,6 +95,17 @@ class SqliteExpressions(Expressions):
 
     @classmethod
     def parse(cls, compiler, source):
+        """Parse `source` expression into SQLite expression.
+
+        :param compiler: Compiler
+        :type compiler: byte.compilers.core.base.Compiler
+
+        :param source: Source Expression
+        :type source: byte.core.models.expressions.base.Expression
+
+        :return: SQLite Expression
+        :rtype: SqliteExpression
+        """
         if not isinstance(source, BaseProxyExpression):
             return source
 
@@ -99,58 +131,69 @@ class SqliteExpressions(Expressions):
         raise NotImplementedError('Unsupported expression: %s' % (base_cls.__name__,))
 
     def and_(self, *values):
-        return SqliteAnd(self, *values)
+        """Create SQLite AND expression."""
+        return SqliteAnd(self.compiler, self, *values)
 
     def or_(self, *values):
-        return SqliteOr(self, *values)
+        """Create SQLite OR expression."""
+        return SqliteOr(self.compiler, self, *values)
 
     def in_(self, rhs):
-        return SqliteIn(self, rhs)
+        """Create SQLite IN expression."""
+        return SqliteIn(self.compiler, self, rhs)
 
     def not_in(self, rhs):
-        return SqliteNotIn(self, rhs)
+        """Create SQLite NOT IN expression."""
+        return SqliteNotIn(self.compiler, self, rhs)
 
     def is_null(self, is_null=True):
+        """Create SQLite IS NULL expression."""
         if is_null:
-            return SqliteIs(self, None)
+            return SqliteIs(self.compiler, self, None)
 
-        return SqliteIsNot(self, None)
+        return SqliteIsNot(self.compiler, self, None)
 
     def contains(self, rhs):
-        return SqliteLike(self, '%%%s%%' % rhs)
+        """Create SQLite LIKE contains expression."""
+        return SqliteLike(self.compiler, self, '%%%s%%' % rhs)
 
     def startswith(self, rhs):
-        return SqliteLike(self, '%s%%' % rhs)
+        """Create SQLite LIKE starts-with expression."""
+        return SqliteLike(self.compiler, self, '%s%%' % rhs)
 
     def endswith(self, rhs):
-        return SqliteLike(self, '%%%s' % rhs)
+        """Create SQLite LIKE ends-with expression."""
+        return SqliteLike(self.compiler, self, '%%%s' % rhs)
 
     def between(self, low, high):
-        return SqliteBetween(self, SqliteSet(low, SqliteClause('AND'), high))
+        """Create SQLite BETWEEN expression."""
+        return SqliteBetween(self.compiler, self, SqliteSet(low, SqliteClause('AND'), high))
 
     def regexp(self, expression):
-        return SqliteRegularExpression(self, expression)
+        """Create SQLite REGEXP expression."""
+        return SqliteRegularExpression(self.compiler, self, expression)
 
     def concat(self, rhs):
-        return SqliteStringExpression(self, rhs)
+        """Create SQLite CONCAT expression."""
+        return SqliteStringExpression(self.compiler, self, rhs)
 
     def __and__(self, rhs):
-        return And(self, rhs)
+        return And(self.compiler, self, rhs)
 
     def __eq__(self, rhs):
         if rhs is None:
-            return SqliteIs(self, rhs)
+            return SqliteIs(self.compiler, self, rhs)
 
-        return SqliteEqual(self, rhs)
+        return SqliteEqual(self.compiler, self, rhs)
 
     def __ne__(self, rhs):
         if rhs is None:
-            return SqliteIsNot(self, rhs)
+            return SqliteIsNot(self.compiler, self, rhs)
 
-        return SqliteNotEqual(self, rhs)
+        return SqliteNotEqual(self.compiler, self, rhs)
 
     def __or__(self, rhs):
-        return SqliteOr(self, rhs)
+        return SqliteOr(self.compiler, self, rhs)
 
     def __pos__(self):
         return self.asc()
@@ -159,14 +202,16 @@ class SqliteExpressions(Expressions):
         return self.desc()
 
 
-class SqliteExpression(Node, SqliteExpressions):
+class SqliteExpression(Expression, SqliteExpressions):
+    """SQLite expression class."""
+
     operator = None
 
-    def __init__(self, lhs, rhs):
-        self.lhs = lhs
-        self.rhs = rhs
-
     def compile(self):
+        """Compile SQLite expression.
+
+        :rtype: SqliteClause
+        """
         if not self.operator:
             raise NotImplementedError('%s.operator hasn\'t been defined' % (self.__class__.__name__,))
 
@@ -189,12 +234,19 @@ class SqliteExpression(Node, SqliteExpressions):
 
 
 class SqliteManyExpression(Node, SqliteExpressions):
+    """SQLite many expression class."""
+
     operator = None
 
     def __init__(self, *values):
+        """Create SQLite many expression."""
         self.values = values
 
     def compile(self):
+        """Compile SQLite many expression.
+
+        :rtype: SqliteSet
+        """
         if not self.operator:
             raise NotImplementedError('%s.operator hasn\'t been defined' % (self.__class__.__name__,))
 
@@ -202,6 +254,8 @@ class SqliteManyExpression(Node, SqliteExpressions):
 
 
 class SqliteStringExpression(SqliteExpression):
+    """SQLite string expression class."""
+
     def __add__(self, other):
         return self.concat(other)
 
@@ -210,62 +264,92 @@ class SqliteStringExpression(SqliteExpression):
 
 
 class SqliteAnd(And, SqliteManyExpression):
+    """SQLite AND expression class."""
+
     operator = 'AND'
 
 
 class SqliteBetween(Between, SqliteExpression):
+    """SQLite BETWEEN expression class."""
+
     operator = 'BETWEEN'
 
 
 class SqliteEqual(Equal, SqliteExpression):
+    """SQLite Equal expression class."""
+
     operator = '=='
 
 
 class SqliteGreaterThan(GreaterThan, SqliteExpression):
+    """SQLite Greater-than expression class."""
+
     operator = '>'
 
 
 class SqliteGreaterThanOrEqual(GreaterThanOrEqual, SqliteExpression):
+    """SQLite Greater-than-or-equal expression class."""
+
     operator = '>='
 
 
 class SqliteIn(In, SqliteExpression):
+    """SQLite IN expression class."""
+
     operator = 'IN'
 
 
 class SqliteIs(Is, SqliteExpression):
+    """SQLite IS expression class."""
+
     operator = 'IS'
 
 
 class SqliteIsNot(IsNot, SqliteExpression):
+    """SQLite IS NOT expression class."""
+
     operator = 'IS NOT'
 
 
 class SqliteLessThan(LessThan, SqliteExpression):
+    """SQLite Less-than expression class."""
+
     operator = '<'
 
 
 class SqliteLessThanOrEqual(LessThanOrEqual, SqliteExpression):
+    """SQLite Less-than-or-equal expression class."""
+
     operator = '<='
 
 
 class SqliteLike(Like, SqliteExpression):
+    """SQLite LIKE expression class."""
+
     operator = 'LIKE'
 
 
 class SqliteNotEqual(NotEqual, SqliteExpression):
+    """SQLite Not-equal expression class."""
+
     operator = '!='
 
 
 class SqliteNotIn(NotIn, SqliteExpression):
+    """SQLite NOT IN expression class."""
+
     operator = 'NOT IN'
 
 
 class SqliteOr(Or, SqliteManyExpression):
+    """SQLite OR expression class."""
+
     operator = 'OR'
 
 
 class SqliteRegularExpression(RegularExpression, SqliteExpression):
+    """SQLite REGEXP expression class."""
+
     operator = 'REGEXP'
 
 
