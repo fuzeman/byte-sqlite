@@ -29,5 +29,5 @@ def test_insert():
         'password': 'two'
     }))
 
-    assert_that(sql, equal_to('INSERT INTO "users" ("users"."username", "users"."password") VALUES (?, ?);'))
+    assert_that(sql, equal_to('INSERT INTO "users" ("username", "password") VALUES (?, ?);'))
     assert_that(parameters, equal_to(('one', 'two')))
