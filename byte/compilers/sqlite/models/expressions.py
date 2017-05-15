@@ -41,10 +41,6 @@ import inspect
 # __rand__ = _e(OP.AND, inv=True)
 # __ror__ = _e(OP.OR, inv=True)
 # __rxor__ = _e(OP.XOR, inv=True)
-# __lt__ = _e(OP.LT)
-# __le__ = _e(OP.LTE)
-# __gt__ = _e(OP.GT)
-# __ge__ = _e(OP.GTE)
 # __lshift__ = _e(OP.IN)
 # __rshift__ = _e(OP.IS)
 # __mod__ = _e(OP.LIKE)
@@ -134,17 +130,25 @@ class SqliteExpressions(Expressions):
         """Create SQLite AND expression."""
         return SqliteAnd(self.compiler, self, *values)
 
-    def or_(self, *values):
-        """Create SQLite OR expression."""
-        return SqliteOr(self.compiler, self, *values)
+    def between(self, low, high):
+        """Create SQLite BETWEEN expression."""
+        return SqliteBetween(self.compiler, self, SqliteSet(low, SqliteClause('AND'), high))
+
+    def concat(self, rhs):
+        """Create SQLite CONCAT expression."""
+        return SqliteStringExpression(self.compiler, self, rhs)
+
+    def contains(self, rhs):
+        """Create SQLite LIKE contains expression."""
+        return SqliteLike(self.compiler, self, '%%%s%%' % rhs)
+
+    def endswith(self, rhs):
+        """Create SQLite LIKE ends-with expression."""
+        return SqliteLike(self.compiler, self, '%%%s' % rhs)
 
     def in_(self, rhs):
         """Create SQLite IN expression."""
         return SqliteIn(self.compiler, self, rhs)
-
-    def not_in(self, rhs):
-        """Create SQLite NOT IN expression."""
-        return SqliteNotIn(self.compiler, self, rhs)
 
     def is_null(self, is_null=True):
         """Create SQLite IS NULL expression."""
@@ -153,29 +157,21 @@ class SqliteExpressions(Expressions):
 
         return SqliteIsNot(self.compiler, self, None)
 
-    def contains(self, rhs):
-        """Create SQLite LIKE contains expression."""
-        return SqliteLike(self.compiler, self, '%%%s%%' % rhs)
+    def not_in(self, rhs):
+        """Create SQLite NOT IN expression."""
+        return SqliteNotIn(self.compiler, self, rhs)
 
-    def startswith(self, rhs):
-        """Create SQLite LIKE starts-with expression."""
-        return SqliteLike(self.compiler, self, '%s%%' % rhs)
-
-    def endswith(self, rhs):
-        """Create SQLite LIKE ends-with expression."""
-        return SqliteLike(self.compiler, self, '%%%s' % rhs)
-
-    def between(self, low, high):
-        """Create SQLite BETWEEN expression."""
-        return SqliteBetween(self.compiler, self, SqliteSet(low, SqliteClause('AND'), high))
+    def or_(self, *values):
+        """Create SQLite OR expression."""
+        return SqliteOr(self.compiler, self, *values)
 
     def regexp(self, expression):
         """Create SQLite REGEXP expression."""
         return SqliteRegularExpression(self.compiler, self, expression)
 
-    def concat(self, rhs):
-        """Create SQLite CONCAT expression."""
-        return SqliteStringExpression(self.compiler, self, rhs)
+    def startswith(self, rhs):
+        """Create SQLite LIKE starts-with expression."""
+        return SqliteLike(self.compiler, self, '%s%%' % rhs)
 
     def __and__(self, rhs):
         return And(self.compiler, self, rhs)
@@ -186,20 +182,32 @@ class SqliteExpressions(Expressions):
 
         return SqliteEqual(self.compiler, self, rhs)
 
+    def __ge__(self, rhs):
+        return SqliteGreaterThanOrEqual(self.compiler, self, rhs)
+
+    def __gt__(self, rhs):
+        return SqliteGreaterThan(self.compiler, self, rhs)
+
+    def __le__(self, rhs):
+        return SqliteLessThanOrEqual(self.compiler, self, rhs)
+
+    def __lt__(self, rhs):
+        return SqliteLessThan(self.compiler, self, rhs)
+
     def __ne__(self, rhs):
         if rhs is None:
             return SqliteIsNot(self.compiler, self, rhs)
 
         return SqliteNotEqual(self.compiler, self, rhs)
 
+    def __neg__(self):
+        return self.desc()
+
     def __or__(self, rhs):
         return SqliteOr(self.compiler, self, rhs)
 
     def __pos__(self):
         return self.asc()
-
-    def __neg__(self):
-        return self.desc()
 
 
 class SqliteExpression(Expression, SqliteExpressions):
