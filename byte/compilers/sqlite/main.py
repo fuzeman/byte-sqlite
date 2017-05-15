@@ -34,19 +34,19 @@ class SqliteCompiler(CompilerPlugin, BaseSqliteCompiler):
         self.insert = SqliteInsertCompiler(executor)
         self.select = SqliteSelectCompiler(executor)
 
-    def compile(self, statement):
-        """Compile :code:`statement` into SQLite statement.
+    def compile(self, query):
+        """Compile :code:`query` into SQLite statement.
 
-        :param statement: Statement
-        :type statement: byte.statements.core.base.Statement
+        :param query: Query
+        :type query: byte.queries.Query
 
         :return: SQLite statement
         :rtype: tuple
         """
-        if isinstance(statement, InsertQuery):
-            return self.insert.compile(statement)
+        if isinstance(query, InsertQuery):
+            return self.insert.compile(query)
 
-        if isinstance(statement, SelectQuery):
-            return self.select.compile(statement)
+        if isinstance(query, SelectQuery):
+            return self.select.compile(query)
 
         raise NotImplementedError

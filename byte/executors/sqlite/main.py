@@ -102,4 +102,4 @@ class SqliteExecutor(ExecutorPlugin):
         if isinstance(query, SelectQuery):
             return SqliteSelectTask(self, statement, parameters).execute()
 
-        raise NotImplementedError('Unsupported query: %s' % (type(statement).__name__,))
+        raise NotImplementedError('Unsupported query: %s' % (type(query).__name__,))
