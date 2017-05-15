@@ -32,26 +32,23 @@ class SqliteInsertCompiler(BaseSqliteCompiler):
             SqliteEntity(self.table)
         ))
 
-        # COLUMNS
-        columns = {}
-
-        for prop in query.state['properties']:
-            columns[prop.name] = SqliteEntity(self.table, prop.name)
-
         # ROWS
         rows = []
 
         for i, item in enumerate(query.state['items']):
             row = []
 
-            for name in columns:
-                row.append(SqliteClause('?', item.get(name)))
+            for prop in query.state['properties']:
+                row.append(SqliteClause('?', item.get(prop.name)))
 
             rows.append(SqliteEnclosedSet(*row))
 
         # PROPERTIES, VALUES
         nodes.extend([
-            SqliteEnclosedSet(*columns.values()),
+            SqliteEnclosedSet(*[
+                SqliteEntity(self.table, prop.name)
+                for prop in query.state['properties']
+            ]),
             SqliteClause('VALUES'),
             SqliteCommaSet(*rows)
         ])
