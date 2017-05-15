@@ -46,7 +46,7 @@ class SqliteInsertCompiler(BaseSqliteCompiler):
         # PROPERTIES, VALUES
         nodes.extend([
             SqliteEnclosedSet(*[
-                SqliteEntity(self.table, prop.name)
+                SqliteEntity(prop.name)
                 for prop in query.state['properties']
             ]),
             SqliteClause('VALUES'),
