@@ -28,8 +28,8 @@ class SqliteSelectCompiler(BaseSqliteCompiler):
             nodes = [SqliteClause('SELECT')]
 
         # PROPERTIES
-        if query.state['select'] is not None:
-            nodes.append(SqliteCommaSet(*query.state['select']))
+        if query.state['properties'] is not None:
+            nodes.append(SqliteCommaSet(*query.state['properties']))
         else:
             nodes.append(SqliteClause('*'))
 
@@ -54,7 +54,7 @@ class SqliteSelectCompiler(BaseSqliteCompiler):
             ))
 
         # GROUP BY
-        if query.state['group_by'] is not None:
+        if query.state['group_by']:
             nodes.extend((
                 SqliteClause('GROUP BY'),
                 SqliteCommaSet(*query.state['group_by'])
@@ -65,7 +65,7 @@ class SqliteSelectCompiler(BaseSqliteCompiler):
         # TODO WINDOW
 
         # ORDER BY
-        if query.state['order_by'] is not None:
+        if query.state['order_by']:
             nodes.extend((
                 SqliteClause('ORDER BY'),
                 SqliteCommaSet(*query.state['order_by'])
