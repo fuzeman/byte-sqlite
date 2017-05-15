@@ -75,3 +75,9 @@ class SqliteWriteTask(WriteTask, SqliteTask):
     """SQLite write task class."""
 
     pass
+
+
+class SqliteInsertTask(SqliteWriteTask):
+    """SQLite insert task class."""
+
+    pass

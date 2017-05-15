@@ -2,8 +2,8 @@
 from __future__ import absolute_import, division, print_function
 
 from byte.executors.core.base import ExecutorPlugin
-from byte.executors.sqlite.tasks import SqliteSelectTask
-from byte.queries import SelectQuery
+from byte.executors.sqlite.tasks import SqliteInsertTask, SqliteSelectTask
+from byte.queries import InsertQuery, SelectQuery
 
 import os
 import sqlite3
@@ -101,5 +101,8 @@ class SqliteExecutor(ExecutorPlugin):
         # Construct task
         if isinstance(query, SelectQuery):
             return SqliteSelectTask(self, statement, parameters).execute()
+
+        if isinstance(query, InsertQuery):
+            return SqliteInsertTask(self, statement, parameters).execute()
 
         raise NotImplementedError('Unsupported query: %s' % (type(query).__name__,))
