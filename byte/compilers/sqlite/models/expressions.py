@@ -101,12 +101,6 @@ class SqliteExpressions(Expressions):
     def and_(self, *values):
         return SqliteAnd(self, *values)
 
-    def asc(self):
-        raise NotImplementedError
-
-    def desc(self):
-        raise NotImplementedError
-
     def or_(self, *values):
         return SqliteOr(self, *values)
 
@@ -179,15 +173,16 @@ class SqliteExpression(Node, SqliteExpressions):
         parameters = []
 
         # Parse values
-        lhs = self._parse_value(parameters, self.lhs)
-        rhs = self._parse_value(parameters, self.rhs)
+        lhs = self._compile_value(parameters, self.lhs)
+        rhs = self._compile_value(parameters, self.rhs)
 
         # Compile clause
         return SqliteClause('%s %s %s' % (lhs, self.operator, rhs), *parameters).compile()
 
-    def _parse_value(self, parameters, value):
+    def _compile_value(self, parameters, value):
         if isinstance(value, BaseProperty):
-            return SqliteEntity(self.compiler.table, value.name)
+            statement, _ = SqliteEntity(self.compiler.table, value.name).compile()
+            return statement
 
         parameters.append(value)
         return '?'
