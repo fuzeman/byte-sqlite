@@ -7,7 +7,9 @@ class SqliteClause(Node):
         self.params = params
 
     def compile(self):
-        return str(self.value), self.params
+        value = self.value
 
-    def __str__(self):
-        return str(self.value)
+        if isinstance(value, Node):
+            value, _ = value.compile()
+
+        return str(value), self.params
