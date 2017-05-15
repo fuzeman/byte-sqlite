@@ -6,6 +6,8 @@ from byte.property import Property
 import byte.compilers.sqlite
 import byte.executors.sqlite
 
+from contextlib import closing
+
 
 class User(Model):
     class Options:
@@ -33,12 +35,10 @@ def test_all():
         );
     """)
 
-    users.executor.connect().cursor().execute("""
-        INSERT INTO users (username, password) VALUES
-            ('one', 'alpha'),
-            ('two', 'beta'),
-            ('three', 'charlie');
-    """)
+    with closing(users.executor.connect().cursor()) as cursor:
+        cursor.execute("INSERT INTO users (username, password) VALUES ('one', 'alpha');")
+        cursor.execute("INSERT INTO users (username, password) VALUES ('two', 'beta');")
+        cursor.execute("INSERT INTO users (username, password) VALUES ('three', 'charlie');")
 
     # Validate items
     assert [(i.username, i.password) for i in users.all()] == [
