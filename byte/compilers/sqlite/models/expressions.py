@@ -57,7 +57,7 @@ class SqliteExpressions(Expressions):
 
     @property
     def compiler(self):
-        """Retrieve current compiler.
+        """Retrieve compiler.
 
         :rtype: byte.compilers.core.base.Compiler
         """
