@@ -18,7 +18,7 @@ class User(Model):
 
 
 def test_insert():
-    """Test insert statement is complied correctly."""
+    """Test insert query is complied correctly."""
     users = Collection(User, 'sqlite://:memory:?table=users')
 
     sql, parameters = users.executor.compiler.compile(users.insert(

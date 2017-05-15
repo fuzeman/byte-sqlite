@@ -18,7 +18,7 @@ class User(Model):
 
 
 def test_all():
-    """Test select statement can be compiled to return all items."""
+    """Test select query can be compiled to return all items."""
     users = Collection(User, 'sqlite://:memory:?table=users')
 
     sql, parameters = users.executor.compiler.compile(users.all())
@@ -28,7 +28,7 @@ def test_all():
 
 
 def test_where():
-    """Test select statement with where expressions can be compiled."""
+    """Test select query with where expressions can be compiled."""
     users = Collection(User, 'sqlite://:memory:?table=users')
 
     sql, parameters = users.executor.compiler.compile(users.select().where(User['id'] == 142))
