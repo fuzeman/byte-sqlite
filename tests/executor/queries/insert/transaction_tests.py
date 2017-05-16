@@ -1,0 +1,53 @@
+from __future__ import absolute_import, division, print_function
+
+from byte.collection import Collection
+from byte.model import Model
+from byte.property import Property
+import byte.compilers.sqlite
+import byte.executors.sqlite
+
+from contextlib import closing
+from hamcrest import *
+from sqlite3 import IntegrityError
+import pytest
+
+
+class User(Model):
+    class Options:
+        slots = True
+
+    id = Property(int, primary_key=True)
+
+    username = Property(str)
+    password = Property(str)
+
+
+def test_single():
+    """Test multiple items are inserted inside a transaction."""
+    users = Collection(User, 'sqlite://:memory:?table=users', plugins=[
+        byte.compilers.sqlite,
+        byte.executors.sqlite
+    ])
+
+    # Create table
+    with closing(users.executor.connect().cursor()) as cursor:
+        with users.executor.connect():
+            cursor.execute("""
+                CREATE TABLE users (
+                    id          INTEGER         PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    username    VARCHAR(255),
+                    password    VARCHAR(255)
+                );
+            """)
+
+    # Try insert items with conflict
+    with pytest.raises(IntegrityError):
+        users.insert().items(
+            {'id': 1, 'username': 'one', 'password': 'alpha'},
+            {'id': 2, 'username': 'two', 'password': 'beta'},
+            {'id': 1, 'username': 'one', 'password': 'charlie'},
+            {'id': 3, 'username': 'three', 'password': 'delta'}
+        ).execute()
+
+    # Ensure no items were inserted
+    assert [(i.username, i.password) for i in users.all()] == []
