@@ -7,6 +7,7 @@ import byte.compilers.sqlite
 import byte.executors.sqlite
 
 from contextlib import closing
+from hamcrest import *
 
 
 class User(Model):
@@ -44,9 +45,13 @@ def test_equals():
     # Validate items
     user = users.select().where(User['username'] == 'one').first()
 
-    assert user is not None
-    assert user.username == 'one'
-    assert user.password == 'alpha'
+    assert_that(user, all_of(
+        not_none(),
+        has_properties({
+            'username': 'one',
+            'password': 'alpha'
+        })
+    ))
 
 
 def test_not_equals():
@@ -74,4 +79,4 @@ def test_not_equals():
     # Validate items
     users = list(users.select().where(User['username'] != 'two').execute())
 
-    assert len(users) == 2
+    assert_that(users, has_length(2))

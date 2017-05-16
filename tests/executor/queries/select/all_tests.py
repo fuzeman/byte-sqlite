@@ -7,6 +7,7 @@ import byte.compilers.sqlite
 import byte.executors.sqlite
 
 from contextlib import closing
+from hamcrest import *
 
 
 class User(Model):
@@ -42,8 +43,17 @@ def test_all():
             cursor.execute("INSERT INTO users (username, password) VALUES ('three', 'charlie');")
 
     # Validate items
-    assert [(i.username, i.password) for i in users.all()] == [
-        ('one',     'alpha'),
-        ('two',     'beta'),
-        ('three',   'charlie')
-    ]
+    assert_that(users.all(), only_contains(
+        has_properties({
+            'username': 'one',
+            'password': 'alpha'
+        }),
+        has_properties({
+            'username': 'two',
+            'password': 'beta'
+        }),
+        has_properties({
+            'username': 'three',
+            'password': 'charlie'
+        })
+    ))

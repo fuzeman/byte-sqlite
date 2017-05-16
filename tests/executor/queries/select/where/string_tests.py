@@ -7,6 +7,7 @@ import byte.compilers.sqlite
 import byte.executors.sqlite
 
 from contextlib import closing
+from hamcrest import *
 
 
 class User(Model):
@@ -44,7 +45,7 @@ def test_or():
     # Validate items
     users = list(users.select().where('username == "one" or password == "charlie"').execute())
 
-    assert len(users) == 2
+    assert_that(users, has_length(2))
 
 
 def test_and():
@@ -72,4 +73,4 @@ def test_and():
     # Validate items
     users = list(users.select().where('id > 1 and password != ?', 'charlie').execute())
 
-    assert len(users) == 1
+    assert_that(users, has_length(1))

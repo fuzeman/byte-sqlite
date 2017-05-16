@@ -7,6 +7,7 @@ import byte.compilers.sqlite
 import byte.executors.sqlite
 
 from contextlib import closing
+from hamcrest import *
 
 
 class User(Model):
@@ -44,6 +45,10 @@ def test_simple():
     # Validate items
     user = users.get(User['id'] == 2)
 
-    assert user is not None
-    assert user.username == 'two'
-    assert user.password == 'beta'
+    assert_that(user, all_of(
+        not_none(),
+        has_properties({
+            'username': 'two',
+            'password': 'beta'
+        })
+    ))

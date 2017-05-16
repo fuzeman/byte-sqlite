@@ -50,4 +50,4 @@ def test_single():
         ).execute()
 
     # Ensure no items were inserted
-    assert [(i.username, i.password) for i in users.all()] == []
+    assert_that(list(users.all()), has_length(0))
