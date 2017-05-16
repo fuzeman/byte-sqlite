@@ -21,17 +21,21 @@ def test_all():
     """Test select query can be compiled to return all items."""
     users = Collection(User, 'sqlite://:memory:?table=users')
 
-    sql, parameters = users.executor.compiler.compile(users.all())
+    statements = list(users.executor.compiler.compile(users.all()))
 
-    assert_that(sql, equal_to('SELECT * FROM "users";'))
-    assert_that(parameters, equal_to(tuple()))
+    assert_that(statements, equal_to([
+        ('SELECT * FROM "users";', ())
+    ]))
 
 
 def test_where():
     """Test select query with where expressions can be compiled."""
     users = Collection(User, 'sqlite://:memory:?table=users')
 
-    sql, parameters = users.executor.compiler.compile(users.select().where(User['id'] == 142))
+    statements = list(users.executor.compiler.compile(users.select().where(
+        User['id'] == 142
+    )))
 
-    assert_that(sql, equal_to('SELECT * FROM "users" WHERE "users"."id" == ?;'))
-    assert_that(parameters, equal_to((142,)))
+    assert_that(statements, equal_to([
+        ('SELECT * FROM "users" WHERE "users"."id" == ?;', (142,))
+    ]))
