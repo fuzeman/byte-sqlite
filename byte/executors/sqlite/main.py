@@ -91,6 +91,11 @@ class SqliteExecutor(ExecutorPlugin):
         return self.connect().cursor()
 
     def transaction(self):
+        """Create database transaction.
+
+        :return: SQLite Connection
+        :rtype: sqlite3.Connection
+        """
         return self.connect()
 
     def execute(self, query):
