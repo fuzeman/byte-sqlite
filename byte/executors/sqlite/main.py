@@ -60,7 +60,10 @@ class SqliteExecutor(ExecutorPlugin):
 
     def construct_compiler(self):
         """Construct compiler."""
-        return self.plugins.get_compiler('sqlite')(self)
+        return self.plugins.get_compiler('sqlite')(
+            self,
+            version=sqlite3.sqlite_version_info
+        )
 
     def connect(self):
         """Connect to database.
@@ -93,16 +96,16 @@ class SqliteExecutor(ExecutorPlugin):
         :param query: Query
         :type query: byte.queries.Query
         """
-        statement, parameters = self.compiler.compile(query)
+        statements = self.compiler.compile(query)
 
-        if not statement:
-            raise ValueError('Empty statement')
+        if not statements:
+            raise ValueError('No statements returned from compiler')
 
         # Construct task
         if isinstance(query, SelectQuery):
-            return SqliteSelectTask(self, statement, parameters).execute()
+            return SqliteSelectTask(self, statements).execute()
 
         if isinstance(query, InsertQuery):
-            return SqliteInsertTask(self, statement, parameters).execute()
+            return SqliteInsertTask(self, statements).execute()
 
         raise NotImplementedError('Unsupported query: %s' % (type(query).__name__,))

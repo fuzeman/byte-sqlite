@@ -45,3 +45,14 @@ class BaseSqliteCompiler(Compiler):
 
         # Append ";" token to statement
         return statement + ';', parameters
+
+
+class SqliteQueryCompiler(BaseSqliteCompiler):
+    def __init__(self, compiler):
+        super(SqliteQueryCompiler, self).__init__(compiler.executor)
+
+        self.compiler = compiler
+
+    @property
+    def version(self):
+        return self.compiler.version

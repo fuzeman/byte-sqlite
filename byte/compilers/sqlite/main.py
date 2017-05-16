@@ -5,6 +5,7 @@ from byte.compilers.core.base import CompilerPlugin
 from byte.compilers.sqlite.base import BaseSqliteCompiler
 from byte.compilers.sqlite.insert import SqliteInsertCompiler
 from byte.compilers.sqlite.select import SqliteSelectCompiler
+from byte.core.helpers.validate import is_tuple_of
 from byte.queries import InsertQuery, SelectQuery
 
 
@@ -23,7 +24,7 @@ class SqliteCompiler(CompilerPlugin, BaseSqliteCompiler):
             'sqlite'
         ]
 
-    def __init__(self, executor):
+    def __init__(self, executor, version):
         """Create SQLite compiler.
 
         :param executor: Executor
@@ -31,8 +32,15 @@ class SqliteCompiler(CompilerPlugin, BaseSqliteCompiler):
         """
         super(SqliteCompiler, self).__init__(executor)
 
-        self.insert = SqliteInsertCompiler(executor)
-        self.select = SqliteSelectCompiler(executor)
+        self.version = version
+
+        # Validate parameters
+        if not is_tuple_of(self.version, int):
+            raise ValueError('Invalid value provided for "version" parameter (expected tuple of int)')
+
+        # Construct children
+        self.insert = SqliteInsertCompiler(self)
+        self.select = SqliteSelectCompiler(self)
 
     def compile(self, query):
         """Compile :code:`query` into SQLite statement.

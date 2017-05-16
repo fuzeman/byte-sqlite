@@ -7,7 +7,7 @@ from byte.core.models import Task, ReadTask, SelectTask, WriteTask
 class SqliteTask(Task):
     """SQLite task base class."""
 
-    def __init__(self, executor, sql, parameters):
+    def __init__(self, executor, statements):
         """Create SQLite executor task.
 
         :param executor: Executor
@@ -21,8 +21,7 @@ class SqliteTask(Task):
         """
         super(SqliteTask, self).__init__(executor)
 
-        self.sql = sql
-        self.parameters = parameters
+        self.statements = statements
 
         self.cursor = None
 
@@ -34,9 +33,13 @@ class SqliteTask(Task):
         """Execute task."""
         self.open()
 
-        # Execute SQL
-        print('EXECUTE: %r %r' % (self.sql, self.parameters))
-        self.cursor.execute(self.sql, self.parameters)
+        # Execute statements
+        for operation in self.statements:
+            if not isinstance(operation, tuple) or len(operation) != 2:
+                raise ValueError('Invalid statement returned from compiler: %s' % (operation,))
+
+            print('EXECUTE: %r %r' % operation)
+            self.cursor.execute(*operation)
 
         return self
 

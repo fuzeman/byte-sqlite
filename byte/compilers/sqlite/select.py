@@ -1,12 +1,12 @@
 """byte-sqlite - select compiler module."""
 from __future__ import absolute_import, division, print_function
 
-from byte.compilers.sqlite.base import BaseSqliteCompiler
+from byte.compilers.sqlite.base import SqliteQueryCompiler
 from byte.compilers.sqlite.models import SqliteClause, SqliteCommaSet, SqliteEntity
 from byte.queries import SelectQuery
 
 
-class SqliteSelectCompiler(BaseSqliteCompiler):
+class SqliteSelectCompiler(SqliteQueryCompiler):
     """SQLite select statement compiler class."""
 
     def compile(self, query):
@@ -82,4 +82,4 @@ class SqliteSelectCompiler(BaseSqliteCompiler):
         # TODO for_update
 
         # Compile nodes into SQLite Statement
-        return self.compile_nodes(nodes)
+        yield self.compile_nodes(nodes)
