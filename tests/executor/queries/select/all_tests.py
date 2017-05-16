@@ -27,18 +27,19 @@ def test_all():
     ])
 
     # Create table, and add items directly to database
-    users.executor.connect().cursor().execute("""
-        CREATE TABLE users (
-            id          INTEGER         PRIMARY KEY AUTOINCREMENT NOT NULL,
-            username    VARCHAR(255),
-            password    VARCHAR(255)
-        );
-    """)
-
     with closing(users.executor.connect().cursor()) as cursor:
-        cursor.execute("INSERT INTO users (username, password) VALUES ('one', 'alpha');")
-        cursor.execute("INSERT INTO users (username, password) VALUES ('two', 'beta');")
-        cursor.execute("INSERT INTO users (username, password) VALUES ('three', 'charlie');")
+        with users.executor.connect():
+            cursor.execute("""
+                CREATE TABLE users (
+                    id          INTEGER         PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    username    VARCHAR(255),
+                    password    VARCHAR(255)
+                );
+            """)
+
+            cursor.execute("INSERT INTO users (username, password) VALUES ('one', 'alpha');")
+            cursor.execute("INSERT INTO users (username, password) VALUES ('two', 'beta');")
+            cursor.execute("INSERT INTO users (username, password) VALUES ('three', 'charlie');")
 
     # Validate items
     assert [(i.username, i.password) for i in users.all()] == [

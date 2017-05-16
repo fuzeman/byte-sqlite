@@ -27,13 +27,15 @@ def test_single():
     ])
 
     # Create table
-    users.executor.connect().cursor().execute("""
-        CREATE TABLE users (
-            id          INTEGER         PRIMARY KEY AUTOINCREMENT NOT NULL,
-            username    VARCHAR(255),
-            password    VARCHAR(255)
-        );
-    """)
+    with closing(users.executor.connect().cursor()) as cursor:
+        with users.executor.connect():
+            cursor.execute("""
+                CREATE TABLE users (
+                    id          INTEGER         PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    username    VARCHAR(255),
+                    password    VARCHAR(255)
+                );
+            """)
 
     # Insert item
     users.insert().items(
@@ -54,13 +56,15 @@ def test_multiple():
     ])
 
     # Create table
-    users.executor.connect().cursor().execute("""
-        CREATE TABLE users (
-            id          INTEGER         PRIMARY KEY AUTOINCREMENT NOT NULL,
-            username    VARCHAR(255),
-            password    VARCHAR(255)
-        );
-    """)
+    with closing(users.executor.connect().cursor()) as cursor:
+        with users.executor.connect():
+            cursor.execute("""
+                CREATE TABLE users (
+                    id          INTEGER         PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    username    VARCHAR(255),
+                    password    VARCHAR(255)
+                );
+            """)
 
     # Insert items
     users.insert().items(

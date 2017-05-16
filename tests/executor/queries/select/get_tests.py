@@ -27,18 +27,19 @@ def test_simple():
     ])
 
     # Create table, and add items directly to database
-    users.executor.connect().cursor().execute("""
-        CREATE TABLE users (
-            id          INTEGER         PRIMARY KEY AUTOINCREMENT NOT NULL,
-            username    VARCHAR(255),
-            password    VARCHAR(255)
-        );
-    """)
-
     with closing(users.executor.connect().cursor()) as cursor:
-        cursor.execute("INSERT INTO users (id, username, password) VALUES (1, 'one', 'alpha');")
-        cursor.execute("INSERT INTO users (id, username, password) VALUES (2, 'two', 'beta');")
-        cursor.execute("INSERT INTO users (id, username, password) VALUES (3, 'three', 'charlie');")
+        with users.executor.connect():
+            cursor.execute("""
+                CREATE TABLE users (
+                    id          INTEGER         PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    username    VARCHAR(255),
+                    password    VARCHAR(255)
+                );
+            """)
+
+            cursor.execute("INSERT INTO users (id, username, password) VALUES (1, 'one', 'alpha');")
+            cursor.execute("INSERT INTO users (id, username, password) VALUES (2, 'two', 'beta');")
+            cursor.execute("INSERT INTO users (id, username, password) VALUES (3, 'three', 'charlie');")
 
     # Validate items
     user = users.get(User['id'] == 2)
