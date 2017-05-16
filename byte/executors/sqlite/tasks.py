@@ -13,11 +13,8 @@ class SqliteTask(Task):
         :param executor: Executor
         :type executor: byte.executors.core.base.Executor
 
-        :param sql: SQLite Statement
-        :type sql: str
-
-        :param parameters: SQLite Parameters
-        :type parameters: tuple
+        :param statements: SQLite Statements
+        :type statements: list of (str, tuple)
         """
         super(SqliteTask, self).__init__(executor)
 
