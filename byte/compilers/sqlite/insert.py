@@ -15,8 +15,8 @@ class SqliteInsertCompiler(SqliteQueryCompiler):
         :param query: Insert Query
         :type query: byte.queries.InsertQuery
 
-        :return: SQLite statement
-        :rtype: tuple
+        :return: SQLite statements
+        :rtype: generator of (str, tuple)
         """
         if not isinstance(query, InsertQuery):
             raise ValueError('Invalid value provided for "query" (expected InsertQuery instance)')
@@ -36,6 +36,20 @@ class SqliteInsertCompiler(SqliteQueryCompiler):
             yield self.compile_one(query, columns, item)
 
     def compile_one(self, query, columns, item):
+        """Compile one item into an insert statement.
+
+        :param query: Insert Query
+        :type query: byte.queries.InsertQuery
+
+        :param columns: Table Columns
+        :type columns: SqliteEnclosedSet
+
+        :param item: Item
+        :type item: dict
+
+        :return: SQLite statement
+        :rtype: (str, tuple)
+        """
         # INSERT
         nodes = [SqliteClause('INSERT')]
 
@@ -66,6 +80,20 @@ class SqliteInsertCompiler(SqliteQueryCompiler):
         return self.compile_nodes(nodes)
 
     def compile_all(self, query, columns, items):
+        """Compile all items into an insert statement.
+
+        :param query: Insert Query
+        :type query: byte.queries.InsertQuery
+
+        :param columns: Table Columns
+        :type columns: SqliteEnclosedSet
+
+        :param items: Items
+        :type items: list of dict
+
+        :return: SQLite statement
+        :rtype: (str, tuple)
+        """
         # INSERT
         nodes = [SqliteClause('INSERT')]
 

@@ -48,11 +48,22 @@ class BaseSqliteCompiler(Compiler):
 
 
 class SqliteQueryCompiler(BaseSqliteCompiler):
+    """SQLite query compiler class."""
+
     def __init__(self, compiler):
+        """Create SQLite query compiler.
+
+        :param compiler: SQLite Compiler
+        :type compiler: SqliteCompiler
+        """
         super(SqliteQueryCompiler, self).__init__(compiler.executor)
 
         self.compiler = compiler
 
     @property
     def version(self):
+        """Retrieve SQLite syntax version.
+
+        :rtype: tuple
+        """
         return self.compiler.version
