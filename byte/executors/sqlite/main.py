@@ -90,6 +90,9 @@ class SqliteExecutor(ExecutorPlugin):
         """
         return self.connect().cursor()
 
+    def transaction(self):
+        return self.connect()
+
     def execute(self, query):
         """Execute query.
 

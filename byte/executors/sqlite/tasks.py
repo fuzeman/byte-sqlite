@@ -33,13 +33,14 @@ class SqliteTask(Task):
         """Execute task."""
         self.open()
 
-        # Execute statements
-        for operation in self.statements:
-            if not isinstance(operation, tuple) or len(operation) != 2:
-                raise ValueError('Invalid statement returned from compiler: %s' % (operation,))
+        # Execute statements inside transaction
+        with self.executor.transaction():
+            for operation in self.statements:
+                if not isinstance(operation, tuple) or len(operation) != 2:
+                    raise ValueError('Invalid statement returned from compiler: %s' % (operation,))
 
-            print('EXECUTE: %r %r' % operation)
-            self.cursor.execute(*operation)
+                print('EXECUTE: %r %r' % operation)
+                self.cursor.execute(*operation)
 
         return self
 
