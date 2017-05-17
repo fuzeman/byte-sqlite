@@ -28,8 +28,8 @@ def test_single():
     ])
 
     # Create table
-    with closing(users.executor.connect().cursor()) as cursor:
-        with users.executor.connect():
+    with users.executor.connection() as connection:
+        with connection.cursor() as cursor:
             cursor.execute("""
                 CREATE TABLE users (
                     id          INTEGER         PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -44,7 +44,7 @@ def test_single():
     ).execute()
 
     # Validate items
-    assert_that(users.all(), only_contains(
+    assert_that(list(users.all()), only_contains(
         has_properties({
             'username': 'one',
             'password': 'alpha'
@@ -60,8 +60,8 @@ def test_multiple():
     ])
 
     # Create table
-    with closing(users.executor.connect().cursor()) as cursor:
-        with users.executor.connect():
+    with users.executor.connection() as connection:
+        with connection.cursor() as cursor:
             cursor.execute("""
                 CREATE TABLE users (
                     id          INTEGER         PRIMARY KEY AUTOINCREMENT NOT NULL,

@@ -28,8 +28,8 @@ def test_simple():
     ])
 
     # Create table, and add items directly to database
-    with closing(users.executor.connect().cursor()) as cursor:
-        with users.executor.connect():
+    with users.executor.connection() as connection:
+        with connection.cursor() as cursor:
             cursor.execute("""
                 CREATE TABLE users (
                     id          INTEGER         PRIMARY KEY AUTOINCREMENT NOT NULL,
