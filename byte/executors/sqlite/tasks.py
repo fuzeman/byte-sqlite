@@ -1,7 +1,14 @@
 """byte-sqlite - executor tasks module."""
 from __future__ import absolute_import, division, print_function
 
+from contextlib import closing
+
 from byte.core.models import Task, ReadTask, SelectTask, WriteTask
+
+import logging
+import sys
+
+log = logging.getLogger(__name__)
 
 
 class SqliteTask(Task):
@@ -20,24 +27,23 @@ class SqliteTask(Task):
 
         self.statements = statements
 
-        self.cursor = None
 
-    def open(self):
-        """Open task."""
+class SqliteReadTask(ReadTask, SqliteTask):
+    """SQLite read task class."""
+
+    def __init__(self, executor, statements):
+        super(SqliteReadTask, self).__init__(executor, statements)
+
         self.cursor = self.executor.cursor()
 
     def execute(self):
         """Execute task."""
-        self.open()
+        for operation in self.statements:
+            if not isinstance(operation, tuple) or len(operation) != 2:
+                raise ValueError('Invalid statement returned from compiler: %s' % (operation,))
 
-        # Execute statements inside transaction
-        with self.executor.transaction():
-            for operation in self.statements:
-                if not isinstance(operation, tuple) or len(operation) != 2:
-                    raise ValueError('Invalid statement returned from compiler: %s' % (operation,))
-
-                print('EXECUTE: %r %r' % operation)
-                self.cursor.execute(*operation)
+            log.debug('Execute: %r %r', *operation)
+            self.cursor.execute(*operation)
 
         return self
 
@@ -46,27 +52,25 @@ class SqliteTask(Task):
         self.cursor.close()
 
 
-class SqliteReadTask(ReadTask, SqliteTask):
-    """SQLite read task class."""
-
-    pass
-
-
 class SqliteSelectTask(SelectTask, SqliteReadTask):
     """SQLite select task class."""
 
     def items(self):
         """Retrieve items from task."""
+        # Parse items from cursor
         for row in self.cursor:
             yield self.model.from_plain(
                 self._build_item(row),
                 translate=True
             )
 
+        # Close cursor
+        self.close()
+
     def _build_item(self, row):
         data = {}
 
-        for i, column in enumerate(self.cursor.description):
+        for i, column in enumerate(self.cursor.columns):
             data[column[0]] = row[i]
 
         return data
@@ -75,7 +79,29 @@ class SqliteSelectTask(SelectTask, SqliteReadTask):
 class SqliteWriteTask(WriteTask, SqliteTask):
     """SQLite write task class."""
 
-    pass
+    def __init__(self, executor, statements):
+        super(SqliteWriteTask, self).__init__(executor, statements)
+
+        self.transaction_created, self.transaction = self.executor.transaction(state=True)
+
+    def execute(self):
+        """Execute task."""
+        with self.transaction:
+            for operation in self.statements:
+                if not isinstance(operation, tuple) or len(operation) != 2:
+                    raise ValueError('Invalid statement returned from compiler: %s' % (operation,))
+
+                log.debug('Execute: %r %r', *operation)
+                self.transaction.execute(*operation)
+
+        return self
+
+    def close(self):
+        """Close task."""
+        if not self.transaction_created:
+            return
+
+        self.transaction.close()
 
 
 class SqliteInsertTask(SqliteWriteTask):
