@@ -6,7 +6,6 @@ from byte.property import Property
 import byte.compilers.sqlite
 import byte.executors.sqlite
 
-from contextlib import closing
 from hamcrest import *
 
 

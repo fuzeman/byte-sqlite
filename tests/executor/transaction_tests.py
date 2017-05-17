@@ -6,10 +6,9 @@ from byte.property import Property
 import byte.compilers.sqlite
 import byte.executors.sqlite
 
-from contextlib import closing
 from hamcrest import *
-from sqlite3 import IntegrityError
 import pytest
+import sqlite3
 
 
 class User(Model):
@@ -73,7 +72,7 @@ def test_rollback():
             """)
 
     # Insert multiple items (with conflict) inside transaction
-    with pytest.raises(IntegrityError):
+    with pytest.raises(sqlite3.IntegrityError):
         with users.transaction():
             users.insert().items({'id': 1, 'username': 'one', 'password': 'alpha'}).execute()
             users.insert().items({'id': 2, 'username': 'one', 'password': 'alpha'}).execute()
