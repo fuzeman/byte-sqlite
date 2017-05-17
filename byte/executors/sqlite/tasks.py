@@ -1,12 +1,9 @@
 """byte-sqlite - executor tasks module."""
 from __future__ import absolute_import, division, print_function
 
-from contextlib import closing
-
 from byte.core.models import Task, ReadTask, SelectTask, WriteTask
 
 import logging
-import sys
 
 log = logging.getLogger(__name__)
 
@@ -32,6 +29,14 @@ class SqliteReadTask(ReadTask, SqliteTask):
     """SQLite read task class."""
 
     def __init__(self, executor, statements):
+        """Create SQLite read task.
+
+        :param executor: Executor
+        :type executor: byte.executors.core.base.Executor
+
+        :param statements: SQLite Statements
+        :type statements: list of (str, tuple)
+        """
         super(SqliteReadTask, self).__init__(executor, statements)
 
         self.cursor = self.executor.cursor()
@@ -80,9 +85,18 @@ class SqliteWriteTask(WriteTask, SqliteTask):
     """SQLite write task class."""
 
     def __init__(self, executor, statements):
+        """Create SQLite write task.
+
+        :param executor: Executor
+        :type executor: byte.executors.core.base.Executor
+
+        :param statements: SQLite Statements
+        :type statements: list of (str, tuple)
+        """
         super(SqliteWriteTask, self).__init__(executor, statements)
 
-        self.transaction_created, self.transaction = self.executor.transaction(state=True)
+        # Retrieve transaction
+        self.transaction = self.executor.transaction()
 
     def execute(self):
         """Execute task."""
@@ -98,10 +112,7 @@ class SqliteWriteTask(WriteTask, SqliteTask):
 
     def close(self):
         """Close task."""
-        if not self.transaction_created:
-            return
-
-        self.transaction.close()
+        pass
 
 
 class SqliteInsertTask(SqliteWriteTask):

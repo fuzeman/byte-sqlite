@@ -82,6 +82,11 @@ class SqliteExecutor(DatabaseExecutorPlugin):
         return SqliteTransaction(self)
 
     def cursor(self):
+        """Create database cursor.
+
+        :return: Cursor
+        :rtype: byte.executors.sqlite.models.cursor.SqliteCursor
+        """
         return SqliteCursor(self)
 
     def execute(self, query):

@@ -1,21 +1,33 @@
+"""byte-sqlite - executor connection module."""
+from __future__ import absolute_import, division, print_function
+
 from byte.executors.core.models.database import DatabaseConnection
 from byte.executors.sqlite.models.cursor import SqliteCursor
 
 
 class SqliteConnection(DatabaseConnection):
+    """SQLite connection class."""
+
     def __init__(self, executor, instance):
+        """Create sqlite connection.
+
+        :param executor: Executor
+        :type executor: byte.executors.core.base.Executor
+
+        :param instance: SQLite Connection
+        :type instance: sqlite3.Connection
+        """
         super(SqliteConnection, self).__init__(executor)
 
         self.instance = instance
 
     def cursor(self):
+        """Create cursor.
+
+        :return: Cursor
+        :rtype: byte.executors.sqlite.models.cursor.SqliteCursor
+        """
         return SqliteCursor(
             self.executor,
             connection=self
         )
-
-    def commit(self):
-        self.instance.commit()
-
-    def rollback(self):
-        self.instance.rollback()

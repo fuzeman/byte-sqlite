@@ -1,54 +1,44 @@
+"""byte-sqlite - executor cursor module."""
+from __future__ import absolute_import, division, print_function
+
 from byte.executors.core.models.database import DatabaseCursor
 
 
 class SqliteCursor(DatabaseCursor):
-    def __init__(self, executor, connection=None, connection_detach=None):
-        super(SqliteCursor, self).__init__(executor)
+    """SQLite cursor class."""
 
-        self.connection = connection
-        self.connection_detach = connection_detach
+    def __init__(self, executor, connection=None):
+        """Create SQLite Cursor.
 
-        # Retrieve connection from executor (if one wasn't provided)
-        if not self.connection:
-            self.connection = self.executor.connection()
-            self.connection_detach = True
+        :param executor: Executor
+        :type executor: byte.executors.core.base.Executor
+
+        :param connection: Connection
+        :type connection: byte.executors.core.models.database.connection.Connection or None
+        """
+        super(SqliteCursor, self).__init__(executor, connection=connection)
 
         # Create cursor
         self.instance = self.connection.instance.cursor()
 
     @property
     def columns(self):
+        """Retrieve columns description from cursor."""
         return self.instance.description
 
     def execute(self, statement, parameters=None):
+        """Execute statement."""
         if not parameters:
             return self.instance.execute(statement)
 
         return self.instance.execute(statement, parameters)
 
     def close(self):
-        self.close_connection()
-        self.close_cursor()
-
-    def close_connection(self):
-        if not self.connection:
-            return
-
-        # Detach connection from thread (if enabled)
-        if self.connection_detach:
-            self.connection.detach()
-
-        # Remove connection reference
-        self.connection = None
-
-    def close_cursor(self):
-        if not self.instance:
-            return
+        """Close cursor."""
+        super(SqliteCursor, self).close()
 
         # Close cursor
         self.instance.close()
-
-        # Remove cursor reference
         self.instance = None
 
     def __iter__(self):
