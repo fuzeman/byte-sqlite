@@ -29,3 +29,13 @@ class SqliteTransaction(DatabaseTransaction, SqliteCursor):
         log.debug('ROLLBACK')
 
         self.connection.instance.rollback()
+
+    def close(self):
+        log.debug('CLOSE')
+
+        # Close cursor
+        self.instance.close()
+        self.instance = None
+
+        # Close transaction
+        super(SqliteTransaction, self).close()
