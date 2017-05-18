@@ -73,21 +73,27 @@ class SqliteExecutor(DatabaseExecutorPlugin):
 
         return SqliteConnection(self, instance)
 
-    def create_transaction(self):
+    def create_transaction(self, connection=None):
         """Create database transaction.
 
         :return: SQLite Connection
         :rtype: sqlite3.Connection
         """
-        return SqliteTransaction(self)
+        return SqliteTransaction(
+            self,
+            connection=connection
+        )
 
-    def cursor(self):
+    def cursor(self, connection=None):
         """Create database cursor.
 
         :return: Cursor
         :rtype: byte.executors.sqlite.models.cursor.SqliteCursor
         """
-        return SqliteCursor(self)
+        return SqliteCursor(
+            self,
+            connection=connection
+        )
 
     def execute(self, query):
         """Execute query.
