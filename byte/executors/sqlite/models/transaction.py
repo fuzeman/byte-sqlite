@@ -31,6 +31,7 @@ class SqliteTransaction(DatabaseTransaction, SqliteCursor):
         self.connection.instance.rollback()
 
     def close(self):
+        """Close transaction."""
         log.debug('CLOSE')
 
         # Close cursor
