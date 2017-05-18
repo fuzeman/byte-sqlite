@@ -25,7 +25,11 @@ install:
   - if [[ $TRAVIS_PYTHON_VERSION != 'pypy'* ]]; then travis_retry pip install pyOpenSSL>=16.2.0; fi
 script:
   - tox
-  - python setup.py bdist_wheel sdist
+  - if [[ $TRAVIS_PYTHON_VERSION != 'pypy3*' ]]; then
+      python setup.py bdist_wheel sdist;
+    else
+      python setup.py sdist;
+    fi
 after_success:
   - coveralls
 
