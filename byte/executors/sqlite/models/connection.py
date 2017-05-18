@@ -2,7 +2,6 @@
 from __future__ import absolute_import, division, print_function
 
 from byte.executors.core.models.database import DatabaseConnection
-from byte.executors.sqlite.models.cursor import SqliteCursor
 
 
 class SqliteConnection(DatabaseConnection):
@@ -20,14 +19,3 @@ class SqliteConnection(DatabaseConnection):
         super(SqliteConnection, self).__init__(executor)
 
         self.instance = instance
-
-    def cursor(self):
-        """Create cursor.
-
-        :return: Cursor
-        :rtype: byte.executors.sqlite.models.cursor.SqliteCursor
-        """
-        return SqliteCursor(
-            self.executor,
-            connection=self
-        )
