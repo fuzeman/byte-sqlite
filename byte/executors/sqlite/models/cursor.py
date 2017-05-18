@@ -3,6 +3,10 @@ from __future__ import absolute_import, division, print_function
 
 from byte.executors.core.models.database import DatabaseCursor
 
+import logging
+
+log = logging.getLogger(__name__)
+
 
 class SqliteCursor(DatabaseCursor):
     """SQLite cursor class."""
@@ -28,6 +32,8 @@ class SqliteCursor(DatabaseCursor):
 
     def execute(self, statement, parameters=None):
         """Execute statement."""
+        log.debug('Execute: %r %r', statement, parameters)
+
         if not parameters:
             return self.instance.execute(statement)
 

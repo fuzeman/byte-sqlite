@@ -47,7 +47,6 @@ class SqliteReadTask(ReadTask, SqliteTask):
             if not isinstance(operation, tuple) or len(operation) != 2:
                 raise ValueError('Invalid statement returned from compiler: %s' % (operation,))
 
-            log.debug('Execute: %r %r', *operation)
             self.cursor.execute(*operation)
 
         return self
@@ -105,7 +104,6 @@ class SqliteWriteTask(WriteTask, SqliteTask):
                 if not isinstance(operation, tuple) or len(operation) != 2:
                     raise ValueError('Invalid statement returned from compiler: %s' % (operation,))
 
-                log.debug('Execute: %r %r', *operation)
                 self.transaction.execute(*operation)
 
         return self
