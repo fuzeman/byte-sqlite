@@ -68,10 +68,15 @@ class SqliteExecutor(DatabaseExecutorPlugin):
         instance = sqlite3.connect(self.path)
         instance.isolation_level = None
 
-        # Enable write-ahead logging
-        instance.execute('PRAGMA journal_mode=WAL;')
+        # Create connection
+        connection = SqliteConnection(self, instance)
 
-        return SqliteConnection(self, instance)
+        # Configure connection
+        with connection.transaction() as transaction:
+            # Enable write-ahead logging
+            transaction.execute('PRAGMA journal_mode=WAL;')
+
+        return connection
 
     def create_transaction(self, connection=None):
         """Create database transaction.
