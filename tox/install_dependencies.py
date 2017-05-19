@@ -30,21 +30,22 @@ def install():
 
 
 def install_development():
-    return pip_install(
-        # Package requirements
-        os.path.abspath('../byte'),
+    # Install byte packages
+    pip_upgrade(
+        os.path.abspath('../byte')
+    )
 
-        # Test requirements
+    # Install additional requirements
+    pip_install(
+        '-rrequirements.txt',
         '-rtests/requirements.txt'
     )
 
 
 def install_release():
-    return pip_install(
-        # Package requirements
+    # Install requirements
+    pip_install(
         '-rrequirements.txt',
-
-        # Test requirements
         '-rtests/requirements.txt'
     )
 
@@ -58,17 +59,28 @@ def install_travis():
     if branch != 'master':
         branch = 'develop'
 
-    return pip_install(
-        # Package requirements
-        'git+https://github.com/fuzeman/byte.git@%s' % (branch,),
+    # Install byte packages
+    pip_upgrade(
+        'git+https://github.com/fuzeman/byte.git@%s' % (branch,)
+    )
 
-        # Test requirements
+    # Install additional requirements
+    pip_install(
+        '-rrequirements.txt',
         '-rtests/requirements.txt'
     )
 
 
 def pip_install(*args):
-    p = subprocess.Popen(['pip', 'install', '--upgrade'] + list(args), shell=False)
+    execute('pip', 'install', *args)
+
+
+def pip_upgrade(*args):
+    execute('pip', 'install', '--upgrade', *args)
+
+
+def execute(*args):
+    p = subprocess.Popen(list(args), shell=False)
     p.communicate()
 
 
