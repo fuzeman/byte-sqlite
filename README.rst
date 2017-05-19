@@ -13,7 +13,7 @@ byte-sqlite
 .. image:: https://img.shields.io/coveralls/fuzeman/byte-sqlite/master.svg?style=flat-square
    :target: https://coveralls.io/github/fuzeman/byte-sqlite
 
-SQLite compiler and executor for `byte <https://github.com/fuzeman/byte`.
+SQLite compiler and executor for `byte <https://github.com/fuzeman/byte>`.
 
 **Supported Platforms:**
 
