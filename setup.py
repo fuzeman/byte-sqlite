@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Byte SQLite setup script (powered by pbr)."""
+"""byte-sqlite - setup script (powered by pbr)."""
 
 from setuptools import setup
 
