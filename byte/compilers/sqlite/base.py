@@ -17,7 +17,7 @@ class BaseSqliteCompiler(Compiler):
         """
         super(BaseSqliteCompiler, self).__init__(executor)
 
-        self.table = self.collection.parameters.get('table')
+        self.table = self.engine.name
 
     def parse_expressions(self, expressions):
         """Parse proxy expressions into SQLite expressions.

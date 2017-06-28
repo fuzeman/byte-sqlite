@@ -1,6 +1,7 @@
 """byte-sqlite - compiler module."""
 from __future__ import absolute_import, division, print_function
 
+from byte.core.plugin.base import Plugin
 from byte.compilers.core.base import CompilerPlugin
 from byte.compilers.sqlite.base import BaseSqliteCompiler
 from byte.compilers.sqlite.insert import SqliteInsertCompiler
@@ -12,11 +13,10 @@ from byte.queries import InsertQuery, SelectQuery
 class SqliteCompiler(CompilerPlugin, BaseSqliteCompiler):
     """SQLite compiler class."""
 
-    key = 'sqlite'
-
     class Meta(CompilerPlugin.Meta):
         """SQLite compiler metadata."""
 
+        engine = Plugin.Engine.Table
         content_type = 'application/x-sqlite3'
 
         extension = [
