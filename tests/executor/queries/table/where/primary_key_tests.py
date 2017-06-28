@@ -1,8 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-from byte.collection import Collection
-from byte.model import Model
-from byte.property import Property
+from byte.table import Model, Property, Table
 import byte.compilers.sqlite
 import byte.executors.sqlite
 
@@ -19,9 +17,9 @@ class User(Model):
     password = Property(str)
 
 
-def test_all():
-    """Test all items can be retrieved from database."""
-    users = Collection(User, 'sqlite://:memory:?table=users', plugins=[
+def test_simple():
+    """Test items can be retrieved by primary key."""
+    users = Table(User, 'sqlite://:memory:', name='users', plugins=[
         byte.compilers.sqlite,
         byte.executors.sqlite
     ])
@@ -37,22 +35,17 @@ def test_all():
                 );
             """)
 
-            cursor.execute("INSERT INTO users (username, password) VALUES ('one', 'alpha');")
-            cursor.execute("INSERT INTO users (username, password) VALUES ('two', 'beta');")
-            cursor.execute("INSERT INTO users (username, password) VALUES ('three', 'charlie');")
+            cursor.execute("INSERT INTO users (id, username, password) VALUES (1, 'one', 'alpha');")
+            cursor.execute("INSERT INTO users (id, username, password) VALUES (2, 'two', 'beta');")
+            cursor.execute("INSERT INTO users (id, username, password) VALUES (3, 'three', 'charlie');")
 
     # Validate items
-    assert_that(users.all(), only_contains(
-        has_properties({
-            'username': 'one',
-            'password': 'alpha'
-        }),
+    user = users.select().where(User['id'] == 2).first()
+
+    assert_that(user, all_of(
+        not_none(),
         has_properties({
             'username': 'two',
             'password': 'beta'
-        }),
-        has_properties({
-            'username': 'three',
-            'password': 'charlie'
         })
     ))

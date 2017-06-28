@@ -1,8 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-from byte.collection import Collection
-from byte.model import Model
-from byte.property import Property
+from byte.table import Model, Property, Table
 
 from hamcrest import *
 
@@ -19,7 +17,7 @@ class User(Model):
 
 def test_all():
     """Test select query can be compiled to return all items."""
-    users = Collection(User, 'sqlite://:memory:?table=users')
+    users = Table(User, 'sqlite://:memory:', name='users')
 
     statements = list(users.executor.compiler.compile(users.all()))
 
@@ -30,7 +28,7 @@ def test_all():
 
 def test_where():
     """Test select query with where expressions can be compiled."""
-    users = Collection(User, 'sqlite://:memory:?table=users')
+    users = Table(User, 'sqlite://:memory:', name='users')
 
     statements = list(users.executor.compiler.compile(users.select().where(
         User['id'] == 142

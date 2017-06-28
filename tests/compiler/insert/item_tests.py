@@ -1,9 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
-from byte.collection import Collection
+from byte.table import Model, Property, Table
 from byte.compilers.sqlite import SqliteCompiler
-from byte.model import Model
-from byte.property import Property
 
 from hamcrest import *
 
@@ -20,7 +18,7 @@ class User(Model):
 
 def test_single():
     """Test insert query for a single item is complied correctly."""
-    users = Collection(User, 'sqlite://:memory:?table=users')
+    users = Table(User, 'sqlite://:memory:', name='users')
 
     compiler = SqliteCompiler(
         users.executor,
@@ -43,7 +41,7 @@ def test_single():
 
 def test_single_legacy():
     """Test legacy insert query for a single item is complied correctly."""
-    users = Collection(User, 'sqlite://:memory:?table=users')
+    users = Table(User, 'sqlite://:memory:', name='users')
 
     compiler = SqliteCompiler(
         users.executor,
@@ -66,7 +64,7 @@ def test_single_legacy():
 
 def test_multiple():
     """Test insert query for multiple items is complied correctly."""
-    users = Collection(User, 'sqlite://:memory:?table=users')
+    users = Table(User, 'sqlite://:memory:', name='users')
 
     compiler = SqliteCompiler(
         users.executor,
@@ -91,7 +89,7 @@ def test_multiple():
 
 def test_multiple_legacy():
     """Test legacy insert query for multiple items is complied correctly."""
-    users = Collection(User, 'sqlite://:memory:?table=users')
+    users = Table(User, 'sqlite://:memory:', name='users')
 
     compiler = SqliteCompiler(
         users.executor,
