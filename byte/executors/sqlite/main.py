@@ -1,6 +1,7 @@
 """byte-sqlite - executor module."""
 from __future__ import absolute_import, division, print_function
 
+from byte.core.plugin.base import Plugin
 from byte.executors.core.base import DatabaseExecutorPlugin
 from byte.executors.sqlite.models.connection import SqliteConnection
 from byte.executors.sqlite.models.cursor import SqliteCursor
@@ -15,13 +16,11 @@ import sqlite3
 log = logging.getLogger(__name__)
 
 
-class SqliteExecutor(DatabaseExecutorPlugin):
-    """SQLite executor class."""
-
-    key = 'sqlite'
+class Base(DatabaseExecutorPlugin):
+    """SQLite base executor class."""
 
     class Meta(DatabaseExecutorPlugin.Meta):
-        """SQLite executor metadata."""
+        """SQLite base executor metadata."""
 
         content_type = 'application/x-sqlite3'
 
@@ -42,8 +41,8 @@ class SqliteExecutor(DatabaseExecutorPlugin):
         :rtype: str
         """
         path = (
-            self.collection.uri.netloc +
-            self.collection.uri.path
+            self.uri.netloc +
+            self.uri.path
         )
 
         if path == ':memory:':
@@ -53,10 +52,19 @@ class SqliteExecutor(DatabaseExecutorPlugin):
 
     def construct_compiler(self):
         """Construct compiler."""
-        return self.plugins.get_compiler('sqlite')(
-            self,
-            version=sqlite3.sqlite_version_info
+        # Find matching compiler
+        cls = self.plugins.match(
+            Plugin.Kind.Compiler,
+            engine=Plugin.Engine.Table,
+            extension='sqlite'
         )
+
+        if not cls:
+            return None
+
+        # Construct compiler
+        self._compiler = cls(self, version=sqlite3.sqlite_version_info)
+        return self._compiler
 
     def create_connection(self):
         """Connect to database.
@@ -119,3 +127,33 @@ class SqliteExecutor(DatabaseExecutorPlugin):
             return SqliteInsertTask(self, statements).execute()
 
         raise NotImplementedError('Unsupported query: %s' % (type(query).__name__,))
+
+
+class SqliteDatabaseExecutor(Base):
+    """SQLite database executor class."""
+
+    key = 'database'
+
+    class Meta(Base.Meta):
+        """SQLite database executor metadata."""
+
+        engine = Plugin.Engine.Database
+
+    def open_table(self, table):
+        return SqliteTableExecutor(
+            table, self.uri,
+            connections=self.connections,
+            transactions=self.transactions,
+            **self.parameters
+        )
+
+
+class SqliteTableExecutor(Base):
+    """SQLite table executor class."""
+
+    key = 'table'
+
+    class Meta(Base.Meta):
+        """SQLite table executor metadata."""
+
+        engine = Plugin.Engine.Table
